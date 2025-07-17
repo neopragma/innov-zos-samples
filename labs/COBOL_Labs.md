@@ -133,7 +133,7 @@ Use SDSF to review the output.
 
 ### COBOL Lab 10 - VSAM KSDS batch update
 
-You'll write a batch application to keep track of free throw statistics for an amateur basketball league.
+Write a batch COBOL program to keep track of free throw statistics for an amateur basketball league.
 
 There are several steps to complete in this lab: 
 1. Upload some data files
@@ -174,3 +174,118 @@ Use the tools you have learned to check the results. For example, you can view b
 Based on the input values available in the update file, you can calculate the number of points scored by counting two (2) points for each completed free throw, minus the number of three-pointers, and then add the number of three-pointers times three (3). 
 
 (5) Have fun!
+
+#### COBOL Lab 11 - Create and load DB2 tables 
+
+This exercise doesn't involve writing COBOL source code, but it sets things up for the batch COBOL DB2 labs to follow. 
+
+The VSAM version of the Freethrow data store comprised a single KSDS. For the DB2 version, you're going to create three tables: 
+
+- TEAMS 
+- PLAYERS 
+- THROWS 
+
+Then you will load the tables with seed data.
+
+Step 1: Create the tables using SPUFI
+
+Using ```labs/DB2 Freethrow TEAMS``` as a guide, use SPUFI to create the ```TEAMS``` table. 
+
+Then, using ```labs/DB2 Freethrow PLAYERS``` as a guide, use SPUFI to create the ```PLAYERS``` table. 
+
+Note there is a one-to-many relationship between ```TEAMS``` and ```PLAYERS```. 
+
+Finally, create the ```THROWS``` table. Define a column for each of the fields in ```labs/FRTHROW.cpy``` _except_ ```FT-Team-Name``` and ```FT-Player-Name```. Include a foreign key column to connect the ```THROWS``` table with the ```PLAYERS``` table. 
+
+Step 2: Load the seed data using SPUFI
+
+Use the file ```labs/FRSEED.data``` as the basis for writing INSERT statements to load the TEAMS, PLAYERS, and THROWS tables. Save the INSERT statements in members of library ```yourid.LAB.SPUFI```.
+
+Use SPUFI to insert the data into the TEAMS, PLAYERS, and THROWS tables. 
+
+Step 3
+
+Using QMF, write a query to select the contents of table THROWS. 
+
+Step 4 
+
+Using QMF and/or SPUFI, develop a query to select the player name, team name, and average points for all the players, without showing duplicates.
+
+Step 5
+
+Using QMF and/or SPUFI, develop a query to list the highest-scoring player on each team based on average points and order the result from highest to lowest points.
+
+Step 6 (optional) 
+
+Prompt an LLM coding assistant to improve the query you developed in Step 5. See if it suggests changes that you didn't think of. Try the changes and see if they work (they might not). 
+
+Step 7 (optional) 
+
+Use an LLM coding assistant to generate a query like the one you developed in Step 5 of this lab. Experiment with different prompts to see how the LLM tool responds and to get a sense of how it may help with the work and what its limitations are. 
+
+#### COBOL Lab 12 - Batch program to list high scoring players 
+
+Write a batch COBOL program that uses the query you developed in Step 5 of COBOL Lab 11 and write the result to SYSOUT. The output should look like this:
+
+![](FTHIAVG-sample-output.png)
+
+#### COBOL Lab 13 - Batch program to list players by team 
+
+Write a batch COBOL program that uses a cursor to process the data in the TEAMS and PLAYERS tables and writes a list of the team members for each team. 
+
+This sounds simple enough, but here's the rest of the story: 
+
+Use ACCEPT to pick up records from SYSIN. Each record contains the name of a team starting in position 1. It's possible that a team name doesn't exist in the database. 
+
+For each team name, set the value of a host variable that is referenced in the WHERE clause of the query. 
+
+Use a _scrollable cursor_. After processing all the rows for a team, close the cursor, get the next team name and set the variable referenced in the WHERE clause, and open the cursor. 
+
+
+
+#### COBOL Lab 14 - Batch update program 
+
+Write a batch COBOL program that reads a sequential input file containing updates to the Free Throw data and applies each update to the database. 
+
+The input file is ```labs/FRUPDATE.data```, which you can upload to the lab environment either as a standalone QSAM data set or as a member in a library. 
+
+Records in the input file may or may not be valid. Your program must validate the input records and write erroneous records to a sequential data set with DDNAME ```BADINPUT```. 
+
+Bear in mind an update record might include a new team and/or a new player. Your program has to handle modifications to existing data as well as creation of new data with the correct associations between THROWS and PLAYERS and between PLAYERS and TEAMS. 
+
+Write the JCL such that the ```BADINPUT``` data set will be deleted if it exists before running the COBOL step, and the job will not error out if the data set does not exist. You should remember the DISP= parameter values for this or be able to find your own JCL from a previous lab that does this.
+
+Use DB2 transaction management in your program. Commit each modification to the database, and rollback in case of error. 
+
+If a serious processing error occurs (not merely an invalid input record), set the condition code for the COBOL job step to 12. 
+
+
+#### COBOL Lab 15 - CICS RECEIVE and SEND 
+
+Write a COBOL CICS program that receives input when it is invoked:
+
+SEIB name 
+
+The program should issue a CICS RECEIVE command to pick up the value the user types after the transaction identifier. 
+
+Use a CICS SEND TEXT command to return the name that was entered and the values of the following fields from the EIBLK:
+
+- EIBDATE, formatted as YYYY/MM/DD 
+- EIBTIME, formatted as HH:MM:SS 
+- EIBTRNID 
+
+You'll need to call upon your mad COBOL skills to convert the date from the peculiar format CICS uses for EIBDATE: It's a seven-digit packed decimal value with the date represented as follows:
+
+- Digit 1 - unused
+- Digit 2 - 0 means 20th century, 1 means 21st century 
+- Digits 3-4 - last two digits of the year 
+- Digits 5-7 - day of the year 
+
+Hint: You can use a couple of intrinsic functions, along with carefully-structured Working-Storage entries:
+
+- INTEGER-OF-DAY
+- DATE-OF-INTEGER 
+
+This might be trickier than it sounds. 
+
+
