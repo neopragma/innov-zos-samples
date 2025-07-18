@@ -288,4 +288,22 @@ Hint: You can use a couple of intrinsic functions, along with carefully-structur
 
 This might be trickier than it sounds. 
 
+#### COBOL Lab 16 - Convert SHOWEIB to use BMS 
+
+Using the RECEIVE/SEND program you wrote in COBOL Lab 15 as a base, convert the solution so that it uses a EXEC CICS SEND MAP instead of EXEC CICS SEND TEXT. 
+
+That will entail the following steps:
+
+1. Write a BMS mapset definition that matches the layout of the hard-coded output from Lab 15. 
+2. Assemble the BMS mapset.
+3. Make a copy of program SHOWEIB so you won't lose the version that uses EXEC CICS SEND TEXT.
+4. Modify the new program so that it includes the mapset copybook and uses EXEC CICS SEND MAP to display the data. 
+5. Define a transaction to invoke your new program using CEDA. Remember to include a GROUP parameter with your userid as the group name.
+5. Add the mapset and program to the CSD using CEDA commands. Remember to include a GROUP parameter with your userid as the group name. 
+6. Try your new transaction and make adjustments to get the output formatting right. 
+
+Tips
+
+1. Remember that you must do CEDA INSTALL after CEDA DEFINE, or CICS will not pick up the new resource definition until it has been shut down and restarted. 
+2. Use any and all resources at your disposal to find information about how to code BMS macros, how to code EXEC CICS commands, and how to troubleshoot problems. You can ask your colleagues, ask your instructor, look for sample code in the course repository, search for information on Stack Overflow, do general Internet searches, use an AI assistant, or just do trial and error. When you get stuck, don't just sit there. Practice with using all these resources is part of the training. You are not being tested to see if your memory is perfect.
 
